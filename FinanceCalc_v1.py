@@ -11,12 +11,146 @@ root.geometry("600x500")
 root.resizable(False, False)
 root.iconbitmap("iconbitmap.ico")
 
+def aktien_append():
+    global aktien_button, chosen_investments
+    if "aktien" in chosen_investments:
+        chosen_investments.remove("aktien")
+        aktien_button.config(fg="black", relief="raised")
+        print(chosen_investments)
+    else:
+        chosen_investments.append("aktien")
+        aktien_button.config(fg="green", relief="sunken")
+        print(chosen_investments)
+
+def immobilien_append():
+    global immobilien_button, chosen_investments
+    if "immobilien" in chosen_investments:
+        chosen_investments.remove("immobilien")
+        immobilien_button.config(fg="black", relief="raised")
+        print(chosen_investments)
+    else:
+        chosen_investments.append("immobilien")
+        immobilien_button.config(fg="green", relief="sunken")
+        print(chosen_investments)
+
+def edelmetalle_append():
+    global edelmetalle_button, chosen_investments
+    if "edelmetalle" in chosen_investments:
+        chosen_investments.remove("edelmetalle")
+        edelmetalle_button.config(fg="black", relief="raised")
+        print(chosen_investments)
+    else:
+        chosen_investments.append("edelmetalle")
+        edelmetalle_button.config(fg="green", relief="sunken")
+        print(chosen_investments)
+
+def anleihen_append():
+    global anleihen_button, chosen_investments
+    if "anleihen" in chosen_investments:
+        chosen_investments.remove("anleihen")
+        anleihen_button.config(fg="black", relief="raised")
+        print(chosen_investments)
+    else:
+        chosen_investments.append("anleihen")
+        anleihen_button.config(fg="green", relief="sunken")
+        print(chosen_investments)
+
+
+
+
+def go_to_chatgpt():
+    webbrowser.open("chatgpt.com")
+
+def calculate():
+    global int_startkapital, int_laufzeit, chosen_investments
+    count_investments = len(chosen_investments)
+    if count_investments == 4:
+        single_budget = int_startkapital / 4
+    elif count_investments == 3:
+        single_budget = int_startkapital / 3
+    elif count_investments == 2:
+        single_budget = int_startkapital / 2
+    elif count_investments == 1:
+        single_budget = int_startkapital
+    # Fomel: 𝐾1 = 𝐾0 ∗ (1 + (𝑟 + 𝜎 ∗ 𝑧))
+    ergebnis = int_startkapital * (1+())
+
+
+def anlageklassen():
+    global startkapital_info_label, laufzeit_entry, laufzeit_button, euro_sign, aktien_button, immobilien_button, anleihen_button, edelmetalle_button, chosen_investments
+    laufzeit_entry.destroy()
+    laufzeit_button.destroy()
+    euro_sign.destroy()
+
+    chosen_investments = []
+
+    startkapital_info_label.config(text="Wähle eine oder mehrere Anlageklassen aus")
+    startkapital_info_label.place(y=250)
+
+    aktien_button = tk.Button(root, text="Aktien", command=aktien_append)
+    aktien_button.place(x=150, y=300, anchor="center")
+
+    immobilien_button = tk.Button(root, text="Immobilien", command=immobilien_append)
+    immobilien_button.place(x=450, y=300, anchor="center")
+
+    anleihen_button = tk.Button(root, text="Anleihen", command=anleihen_append)
+    anleihen_button.place(x=150, y=350, anchor="center")
+
+    edelmetalle_button = tk.Button(root, text="Edelmetalle", command=edelmetalle_append)
+    edelmetalle_button.place(x=450, y=350, anchor="center")
+
+    ausrechnen_resize = Image.open("ausr.png").resize((50, 50))
+    ausrechnen_button_pic = ImageTk.PhotoImage(ausrechnen_resize)
+
+    ausrechnen_button = tk.Button(root, image=ausrechnen_button_pic, borderwidth=0, highlightthickness=0, cursor="hand2", command=calculate)
+    ausrechnen_button.place(x=300, y=300, anchor="center")
+
+    ausrechnen_button.image = ausrechnen_button_pic
+
+
+
+def laufzeit_check():
+    global value_error_label, startkapital_info_label, laufzeit_entry, int_laufzeit
+    laufzeit = laufzeit_entry.get()
+    try:
+        if int(laufzeit) > 0:
+            int_laufzeit = int(laufzeit)
+            anlageklassen()
+        else:
+            value_error_label.config(text="Die Laufzeit darf nicht negativ sein!", fg="red")
+    except ValueError:
+        value_error_label.config(text="Die Eingabe darf nur auf Zahlen bestehen!", fg="red")
+
+def laufzeit():
+    global value_error_label, startkapital_entry,  startkapital_button, startkapital_info_label, premium_button, credits_button, button_disabled_info, laufzeit_entry, laufzeit_button, euro_sign
+    startkapital_entry.destroy()
+    startkapital_button.destroy()
+    value_error_label.config(text="")
+
+    euro_sign.config(text="Jahre")
+
+    premium_button.config(state=tk.DISABLED)
+    credits_button.config(state=tk.DISABLED)
+
+    button_disabled_info = tk.Label(root, text="Funktionen sind eingeschränkt bis der Vorgang beendet ist")
+    button_disabled_info.place(x=300, y=480, anchor="center")
+    
+    startkapital_info_label.config(text="Laufzeit")
+
+    laufzeit_entry = ttk.Entry(root, width=25)
+    laufzeit_entry.place(x=300, y=300, anchor="center")
+
+    laufzeit_button = tk.Button(root, text="Weiter", command=laufzeit_check)
+    laufzeit_button.place(x=300, y=330, anchor="center")
+
+
 def check_startkapital():
-    global startkapital_entry, value_error_label
+    global startkapital_entry, value_error_label, int_startkapital
     startkapital = startkapital_entry.get()
     try:
         if int(startkapital) > 0:
-            return True
+            int_startkapital = int(startkapital)
+            laufzeit()
         else:
             value_error_label.config(text="Das Startkapital darf nicht negativ sein!", fg="red")
     except ValueError:
@@ -26,17 +160,28 @@ def show_credits():
     global credits_label, back_button
     for widget in root.winfo_children():
         widget.destroy()
-    credits_label = tk.Label(root, text="Fast alles: Maxi | Design der Bilder: ChatGPT")
-    credits_label.place(x=300, y=250, anchor="center")
-    back_button = tk.Button(root, text="")
-    credits_label.pack()
+    credits_label = tk.Label(root, text="Fast alles: Maxi | Design der Bilder: ChatGPT (der süße 💕)")
+    credits_label.place(x=300, y=100, anchor="center")
+
+    back_button = tk.Button(root, text="Zurück zum Menü", command=main_menu)
+    back_button.pack()
+
+    mdm_button = tk.Button(root, text="Mitarbeiter des Monats (nicht von Lennart geklaut):", command=go_to_chatgpt)
+    mdm_button.place(x=300, y=250, anchor="center")
+
+    mdm_logo = Image.open("mdm.jpg")
+    mdm_logo = mdm_logo.resize((200, 200))
+    mdm = ImageTk.PhotoImage(mdm_logo)
+
+    mdm_logo_label = tk.Label(root, image=mdm)
+    mdm_logo_label.place(x=300, y=400, anchor="center")
+    mdm_logo_label.image = mdm
     
 
 def main_menu():
-    global startkapital_entry, value_error_label, credits_label, back_button
-    # HIER IF EXISTS DA IST DER FEHLER!!
-    credits_label.destroy()
-    back_button.destroy()
+    global startkapital_entry, value_error_label, credits_label, back_button, startkapital_button, startkapital_info_label, premium_button, credits_button, euro_sign
+    for widget in root.winfo_children():
+        widget.destroy()
     pic = Image.open("menu_pic.png")
     pic = pic.resize((600, 250))
     menu_pic = ImageTk.PhotoImage(pic)
@@ -53,9 +198,9 @@ def main_menu():
     startkapital_info_label.place(x=300, y=280, anchor="center")
 
     euro_sign = tk.Label(root, text="€")
-    euro_sign.place(x=385, y=300, anchor="center")
+    euro_sign.place(x=395, y=300, anchor="center")
 
-    startkapital_button = tk.Button(root, text="Next", width=15, command=check_startkapital)
+    startkapital_button = tk.Button(root, text="Weiter", width=15, command=check_startkapital)
     startkapital_button.place(x=300, y=330, anchor="center")
 
     value_error_label = tk.Label(root, text="", fg="red")
@@ -64,8 +209,8 @@ def main_menu():
     premium_button = tk.Button(root, text="Premium kaufen", command=show_premium_popup)
     premium_button.place(x=300, y=400, anchor="center")
 
-    credits_button = tk.Button(root, text="Credits")
-    credits_button.place(x=300, y=440, anchor="center", command=show_credits)
+    credits_button = tk.Button(root, text="Credits", command=show_credits)
+    credits_button.place(x=300, y=440, anchor="center")
 
 
 def show_premium_popup():
