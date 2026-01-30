@@ -4,6 +4,7 @@ from tkinter import ttk
 import webbrowser
 import time
 from time import sleep
+import random
 
 root = tk.Tk()
 root.title("FinanceCalc Pro Max Ultra")
@@ -61,19 +62,72 @@ def anleihen_append():
 def go_to_chatgpt():
     webbrowser.open("chatgpt.com")
 
+def ergebnisse_ausgeben():
+    global ergebnis_liste
+    for w in root.winfo_children():
+        w.destroy()
+    title_label = tk.Label(root, text="""Jahr  |  Startkapital  |  Rendite (%)  |  Endkapital
+                                      -------------------------------------------------------""")
+    title_label.place(x=300, y=50, anchor="center")
+
+    y = 70
+
+    for ergebnis in ergebnis_liste:
+
+        label = tk.Label(root, text=ergebnis)
+        label.place(x=300, y=y, anchor="center")
+
+        y += 20
+
+
+def simulate_year(K0, r, o):
+    z = random.gauss(-1, 2)
+    return K0 * (1 + (r + o * z))
+
 def calculate():
-    global int_startkapital, int_laufzeit, chosen_investments
+    global int_startkapital, int_laufzeit, chosen_investments, investment_params, ergebnis_liste
+
+    ergebnis_liste = []
+
     count_investments = len(chosen_investments)
-    if count_investments == 4:
-        single_budget = int_startkapital / 4
-    elif count_investments == 3:
-        single_budget = int_startkapital / 3
-    elif count_investments == 2:
-        single_budget = int_startkapital / 2
-    elif count_investments == 1:
-        single_budget = int_startkapital
-    # Fomel: 𝐾1 = 𝐾0 ∗ (1 + (𝑟 + 𝜎 ∗ 𝑧))
-    ergebnis = int_startkapital * (1+())
+    if count_investments == 0:
+        value_error_label.config(text="Du musst mindestens ein Investment auswählen", fg="red")
+        value_error_label.place(y=370)
+        return
+
+    investment_params = {
+    "aktien":      {"r": 0.15, "o": 0.15},
+    "immobilien": {"r": 0.08, "o": 0.10},
+    "anleihen":   {"r": 0.03, "o": 0.05},
+    "edelmetalle":{"r": 0.05, "o": 0.12},
+    }
+
+    single_budget = int_startkapital / count_investments
+    
+    capitals = {name: single_budget for name in chosen_investments}
+
+    for year in range(1, int_laufzeit +1):
+        total = 0
+
+        year_start = sum(capitals.values())
+
+        for name in capitals:
+            params = investment_params[name]
+            capitals[name] = simulate_year(capitals[name], params["r"], params["o"])
+
+            year_end = sum(capitals.values())
+            year_return = (year_end - year_start) / year_start * 100
+
+        ergebnis_liste.append(f"{year:>4}   | {year_start:>12,.2f} | {year_return:>10.2f}% | {year_end:>12,.2f}")
+
+    endkapital = sum(capitals.values())
+    gesamtverdienst = int(endkapital) - int_startkapital
+    ergebnis_liste.append(f"\nZusammenfassung: {endkapital:,.2f}€")
+    ergebnis_liste.append(f"\nGewinn/Verlust: {gesamtverdienst:,.2f}€")
+
+    ergebnisse_ausgeben()
+
+
 
 
 def anlageklassen():
